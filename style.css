@@ -1,0 +1,113 @@
+/* Responsive & accessibility tweaks */
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: auto; /* allow scrolling on small screens */
+    padding: 24px;
+    gap: 12px;
+}
+
+/* Keep the background image in a pseudo-element so the blur doesn't affect content */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image: url(artificial-dimension-poster-02-2.jpg);
+    background-size: cover;
+    background-position: center;
+    filter: blur(10px);
+    z-index: -1;
+    pointer-events: none;
+}
+
+h1 {
+    font-size: clamp(1.6rem, 6vw, 4rem);
+    color: white;
+    text-align: center;
+    font-family: fantasy;
+    line-height: 1.05;
+    margin: 0;
+    padding: 0 8px;
+    word-break: break-word;
+}
+
+/* Bouncy title animation */
+.title {
+    display: inline-block;
+    animation: float 3s ease-in-out infinite;
+    transform-origin: center;
+    will-change: transform;
+}
+
+@keyframes float {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+    100% { transform: translateY(0); }
+}
+
+/* Responsive input */
+#guess {
+    width: min(400px, 90%);
+    max-width: 100%;
+    height: 48px;
+    font-size: clamp(1rem, 4vw, 1.5rem);
+    margin-top: 12px;
+    border-radius: 10px;
+    border: none;
+    padding: 0 12px;
+    box-sizing: content-box;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+#guess:focus {
+    outline: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), 0 0 0 3px rgba(255, 255, 255, 0.08);
+}
+
+#result {
+    margin-top: 12px;
+    font-size: clamp(1rem, 3.5vw, 1.5rem);
+    color: white;
+    text-align: center;
+}
+
+/* Background music toggle button */
+.music-toggle {
+    position: fixed;
+    left: 16px;
+    bottom: 16px;
+    background: rgba(0,0,0,0.45);
+    color: #fff;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 999px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    backdrop-filter: blur(6px);
+}
+
+.music-toggle:focus { outline: 2px solid rgba(255,255,255,0.15); }
+
+/* Mobile optimizations */
+@media (max-width: 480px) {
+    body { padding: 16px; gap: 8px; }
+    h1 { font-size: clamp(1.4rem, 7vw, 2.4rem); }
+    #guess { height: 44px; font-size: 1rem; }
+    #result { font-size: 1rem; }
+    /* Move music toggle to the right for easier thumb reach on phones */
+    .music-toggle { left: auto; right: 12px; bottom: 12px; padding: 10px 12px; font-size: 1.4rem; }
+    /* Reduce blur to improve performance on lower powered devices */
+    body::before { filter: blur(6px); }
+}
+
+@media (max-width: 360px) {
+    body::before { filter: blur(4px); }
+}

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Document</title>
+</head>
+<body>
+    <div>
+        <h1 class="title">Is it a fruit of the spirit? 🤔</h1>
+    </div>
+    <div>
+        <input id="guess" type="text" placeholder="Type a fruit of the Spirit...">
+    </div>
+    <div>
+        <h1 id="result" aria-live="polite"></h1>
+    </div>
+
+    <!-- Background music toggle (audio created via JS to handle path encoding and play promises) -->
+    <button id="music-toggle" class="music-toggle" aria-pressed="false" title="Toggle background music">🔈</button>
+
+    <script>
+    (function(){
+    // List of the Fruits of the Spirit to check against (lowercased)
+    const fruits = [
+        'love', 'joy', 'peace', 'patience', 'kindness', 'goodness', 'faithfulness', 'gentleness', 'self-control'
+    ];
+
+    const input = document.getElementById('guess');
+    const result = document.getElementById('result');
+
+    // Preload sounds (files should be placed in project root or adjust paths)
+    const correctSound = new Audio('correct.mp3');
+    correctSound.preload = 'auto';
+    const wrongSound = new Audio('wrong.mov');
+    wrongSound.preload = 'auto';
+
+    // Background music (create Audio via JS so we can encode path and handle play() promise)
+    const musicToggle = document.getElementById('music-toggle');
+    const bgSrc = encodeURI('Fruit of the Spirit  Full Preview  Uncle Charlie Songs.mp3');
+    const bgMusic = new Audio(bgSrc);
+    bgMusic.loop = true;
+    bgMusic.preload = 'auto';
+    bgMusic.autoplay = true;
+    bgMusic.muted = true; // start muted for autoplay compatibility
+    bgMusic.volume = 0.18;
+    // attempt to play and log failures for diagnostics
+    bgMusic.play().catch((err) => console.warn('Background music playback failed:', err));
+
+    function toggleMusic(){
+        if(!bgMusic) return;
+        if(bgMusic.muted){
+            bgMusic.muted = false;
+            bgMusic.play().catch((err)=>console.warn('bg play failed on unmute:', err));
+            musicToggle.textContent = '🔊';
+            musicToggle.setAttribute('aria-pressed','true');
+        } else {
+            bgMusic.muted = true;
+            musicToggle.textContent = '🔈';
+            musicToggle.setAttribute('aria-pressed','false');
+        }
+    }
+
+    musicToggle && musicToggle.addEventListener('click', toggleMusic);
+
+    // Unmute on first user interaction (click or keydown) to improve chances of playback
+    const unmuteOnUserGesture = () => {
+        if(bgMusic && bgMusic.muted){
+            bgMusic.muted = false;
+            bgMusic.play().catch((err)=>console.warn('bg play failed after gesture:', err));
+            musicToggle.textContent = '🔊';
+            musicToggle.setAttribute('aria-pressed','true');
+        }
+        document.removeEventListener('click', unmuteOnUserGesture);
+        document.removeEventListener('keydown', unmuteOnUserGesture);
+    };
+    document.addEventListener('click', unmuteOnUserGesture, { once: true });
+    document.addEventListener('keydown', unmuteOnUserGesture, { once: true });
+    function normalize(s){
+        return s.trim().toLowerCase();
+    }
+
+    function check(){
+        const val = normalize(input.value);
+        if(!val){
+            result.textContent = '';
+            return;
+        }
+
+        // Accept variants like "self control" or "self-control"
+        const variants = [val, val.replace(/\s+/g,'-'), val.replace(/-/g,' ')];
+        const found = variants.some(v => fruits.includes(v));
+
+        if(found){
+            result.textContent = 'yes it is ✅';
+            // play correct sound (safe to call from user interaction)
+            try { correctSound.currentTime = 0; correctSound.play(); } catch(e) { /* ignore */ }
+        } else {
+            result.textContent = 'no it is not ❌';
+            try { wrongSound.currentTime = 0; wrongSound.play(); } catch(e) { /* ignore */ }
+        }
+    }
+
+    // Live check while typing and also when Enter is pressed
+    //input.addEventListener('input', check);
+    input.addEventListener('keyup', (e) => {
+        if(e.key === 'Enter'){
+            check();
+            // unmute background music on Enter (user gesture)
+            if(typeof bgMusic !== 'undefined' && bgMusic.muted){
+                bgMusic.muted = false;
+                bgMusic.play().catch((err)=>console.warn('bg play failed on Enter:', err));
+                const toggle = document.getElementById('music-toggle');
+                toggle && toggle.setAttribute('aria-pressed','true');
+                toggle && (toggle.textContent = '🔊');
+            }
+        }
+    });
+})();
+
+</script>
+</body>
+</html>
